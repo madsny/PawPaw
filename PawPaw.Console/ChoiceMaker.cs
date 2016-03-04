@@ -28,14 +28,14 @@ namespace PawPaw.Cmd
             _postIdCache = new List<Guid>();
             _choices = new Dictionary<string, Choice>
             {
-                { "P", new Choice("(P)rint choices", () => PrintChoices(_choices))},
+                { "PR", new Choice("(PR)int choices", () => PrintChoices(_choices))},
                 { "U", new Choice("Set (u)ser", SetUser)},
-                { "D", new Choice("(D)elete index", _adminService.DeleteIndex)},
-                { "C", new Choice("(C)reate index", _adminService.EnsureIndexExists) },
-                { "I", new Choice("(I)nsert post", InsertPost)},
+                { "DE", new Choice("(DE)lete index", _adminService.DeleteIndex)},
+                { "CR", new Choice("(CR)eate index", _adminService.EnsureIndexExists) },
+                { "P", new Choice("Insert (P)ost", InsertPost)},
                 { "L", new Choice("(L)ist posts", ListPosts)},
                 { "S", new Choice("(S)et current post", SetCurrentPost)},
-                { "A", new Choice("(A)dd comment", AddComment)},
+                { "C", new Choice("Add (C)omment", AddComment)},
                 { "Q", new Choice("(Q)uit", () => {})}
             };
         }
