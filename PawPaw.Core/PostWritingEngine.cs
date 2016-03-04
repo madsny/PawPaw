@@ -32,9 +32,13 @@ namespace PawPaw.Core
 
         private void ProcessQueue()
         {
-            foreach (var command in CommandQueue)
+            while (!CommandQueue.IsEmpty)
             {
-                command.Accept(_commandHandler);
+                ICommand command;
+                if (CommandQueue.TryDequeue(out command))
+                {
+                    command.Accept(_commandHandler);
+                }
             }
             _commandHandler.Commit();
         }

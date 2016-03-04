@@ -45,6 +45,7 @@ namespace PawPaw.Cmd
             Console.Write("Username: ");
             var user = Console.ReadLine();
             _userProvider.SetCurrentUser(user);
+            Console.Clear();
         }
 
         private void AddComment()
@@ -56,6 +57,7 @@ namespace PawPaw.Cmd
 
         private void SetCurrentPost()
         {
+            ListPosts();
             Console.Write("Post index ('c' for clear): ");
             var choice = Console.ReadLine();
             if ("c".Equals(choice, StringComparison.InvariantCultureIgnoreCase))
@@ -65,6 +67,12 @@ namespace PawPaw.Cmd
             }
             int index = int.Parse(choice);
             _openPost = _postReader.GetPost(_postIdCache[index]);
+            Console.Clear();
+            Console.WriteLine("{0,-10} - {1,-40} ({2:dd.MM.yy HH:mm:ss})", _openPost.User.Name, _openPost.Content, _openPost.Timestamp.ToLocalTime());
+            foreach (var comment in _openPost.Comments ?? Enumerable.Empty<Comment>())
+            {
+                Console.WriteLine("     {0,-10} - {1,-40} ({2:dd.MM.yy HH:mm:ss})", comment.User.Name, comment.Content, comment.Timestamp.ToLocalTime());
+            }
         }
 
         private void ListPosts()
@@ -121,13 +129,13 @@ namespace PawPaw.Cmd
             } while (!input.Trim().Equals("q", StringComparison.InvariantCultureIgnoreCase));
         }
         
-        private static string PrintChoices(Dictionary<string, Choice> choices)
+        private static void PrintChoices(Dictionary<string, Choice> choices)
         {
+            Console.Clear();
             foreach (var choice in choices.Values)
             {
                 Console.WriteLine(choice.Description);
             }
-            return "OK";
         }
     }
 }
