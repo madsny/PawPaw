@@ -57,5 +57,10 @@ namespace PawPaw.ElasticSearch
 
             return result.Documents;
         }
+
+        public Post GetPost(Guid guid)
+        {
+            return _client.Get<Post>(guid.ToString()).Source;
+        }
     }
 }
