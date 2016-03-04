@@ -5,13 +5,13 @@ namespace PawPaw.Cmd
 
     public class Choice
     {
-        public Choice(string description, Func<string> func)
+        public Choice(string description, Action action)
         {
             Description = description;
-            Func = func;
+            Action = action;
         }
 
         public string Description { get; set; }
-        public Func<string> Func { get; set; }
+        public Action Action { get; set; }
     }
 }

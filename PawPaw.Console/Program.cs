@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
-using Nest;
+using PawPaw.Core;
 using PawPaw.ElasticSearch;
-using PawPaw.ElasticSearch.Models;
 
 namespace PawPaw.Cmd
 {
@@ -11,12 +9,16 @@ namespace PawPaw.Cmd
     {
         static void Main(string[] args)
         {
-            var indexer = new Indexer();
-            
-            var choiceMaker = new ChoiceMaker(indexer);
+            var engine = new PostWritingEngine(new CommandHandler());
+            var thread = new Thread(() => engine.Run());
+            thread.Start();
+            var userProvider = new CmdUserProvider();
+            var choiceMaker = new ChoiceMaker(new AdminService(), new PostReader(), new PostWritingService(userProvider, engine), userProvider);
             choiceMaker.RunRunRun();
 
             Console.WriteLine("Thank you, I'm content");
+            engine.Stop();
+            thread.Join();
             Thread.Sleep(1000);
         }
     }

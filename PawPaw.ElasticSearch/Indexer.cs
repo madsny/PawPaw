@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Nest;
-using PawPaw.ElasticSearch.Models;
+using PawPaw.Core.Models;
 
 namespace PawPaw.ElasticSearch
 {
-    public class Indexer
+    internal class Indexer
     {
         private readonly ElasticClient _client;
         public const string DefaultIndex = "pawpaw";
@@ -25,29 +22,28 @@ namespace PawPaw.ElasticSearch
             _client = new ElasticClient(settings);
         }
 
-        public string EnsureIndexExists()
+        public void EnsureIndexExists()
         {
             if (!_client.IndexExists(DefaultIndex).Exists)
             {
-                return GetResponse(_client.CreateIndex(DefaultIndex, c => c.AddMapping<Post>(m => m.MapFromAttributes())));
+                EnsureCorrectResponse(_client.CreateIndex(DefaultIndex, c => c.AddMapping<Post>(m => m.MapFromAttributes())));
             }
-            return "Index allready exists";
         }
 
-        public string Index(Post post)
+        public void Index(Post post)
         {
-            return GetResponse(_client.Index(post, de => de.Id(post.Id.ToString())));
+            EnsureCorrectResponse(_client.Index(post, de => de.Id(post.Id.ToString())));
         }
 
-        public string DeleteIndex()
+        public void DeleteIndex()
         {
-            return GetResponse(_client.DeleteIndex(DefaultIndex));
+            EnsureCorrectResponse(_client.DeleteIndex(DefaultIndex));
         }
 
-        private string GetResponse(IResponse response)
+        private void EnsureCorrectResponse(IResponse response)
         {
             if (response.IsValid)
-                return string.Format("JUPP: {0}", response.ConnectionStatus.HttpStatusCode);
+                return;
             throw new Exception(response.ServerError?.Error ?? response.ConnectionStatus.HttpStatusCode?.ToString());
         }
 

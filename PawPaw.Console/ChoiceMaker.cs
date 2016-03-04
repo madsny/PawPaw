@@ -2,107 +2,92 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using PawPaw.Core;
+using PawPaw.Core.Models;
 using PawPaw.ElasticSearch;
-using PawPaw.ElasticSearch.Models;
 
 namespace PawPaw.Cmd
 {
     public class ChoiceMaker
     {
-        private readonly Indexer _indexer;
+        private readonly AdminService _adminService;
+        private readonly PostReader _postReader;
+        private readonly PostWritingService _postWritingService;
+        private readonly CmdUserProvider _userProvider;
         private readonly Dictionary<string, Choice> _choices;
         private readonly List<Guid> _postIdCache;
         private Post _openPost;
 
 
-        public ChoiceMaker(Indexer indexer)
+        public ChoiceMaker(AdminService adminService, PostReader postReader, PostWritingService postWritingService, CmdUserProvider userProvider)
         {
-            _indexer = indexer;
+            _adminService = adminService;
+            _postReader = postReader;
+            _postWritingService = postWritingService;
+            _userProvider = userProvider;
             _postIdCache = new List<Guid>();
             _choices = new Dictionary<string, Choice>
             {
                 { "P", new Choice("(P)rint choices", () => PrintChoices(_choices))},
-                {"D", new Choice("(D)elete index", indexer.DeleteIndex)},
-                {"C", new Choice("(C)reate index", indexer.EnsureIndexExists) },
+                { "U", new Choice("Set (u)ser", SetUser)},
+                { "D", new Choice("(D)elete index", _adminService.DeleteIndex)},
+                { "C", new Choice("(C)reate index", _adminService.EnsureIndexExists) },
                 { "I", new Choice("(I)nsert post", InsertPost)},
                 { "L", new Choice("(L)ist posts", ListPosts)},
-                { "O", new Choice("(O)pen post", OpenPost)},
-                { "S", new Choice("Clo(S)e post", ClosePost)},
+                { "S", new Choice("(S)et current post", SetCurrentPost)},
                 { "A", new Choice("(A)dd comment", AddComment)},
-                { "Q", new Choice("(Q)uit", Quit)}
+                { "Q", new Choice("(Q)uit", () => {})}
             };
         }
 
-        private string AddComment()
+        private void SetUser()
         {
-            var post = _indexer.GetPost(_openPost.Id);
-            post.Comments = post.Comments ?? new List<Comment>();
-            Console.Write("User: ");
+            Console.Write("Username: ");
             var user = Console.ReadLine();
+            _userProvider.SetCurrentUser(user);
+        }
+
+        private void AddComment()
+        {
             Console.Write("Content: ");
             var content = Console.ReadLine();
-            post.Comments.Add(new Comment
+            _postWritingService.CreateComment(_openPost.Id, content);
+        }
+
+        private void SetCurrentPost()
+        {
+            Console.Write("Post index ('c' for clear): ");
+            var choice = Console.ReadLine();
+            if ("c".Equals(choice, StringComparison.InvariantCultureIgnoreCase))
             {
-                Id = Guid.NewGuid(),
-                User = new User { Name = user, UserId = Guid.NewGuid()},
-                Content = content,
-                TimeStamp = DateTime.UtcNow
-            });
-            return _indexer.Index(post);
+                _openPost = null;
+                return;
+            }
+            int index = int.Parse(choice);
+            _openPost = _postReader.GetPost(_postIdCache[index]);
         }
 
-        private string ClosePost()
+        private void ListPosts()
         {
-            _openPost = null;
-            return "Post closed";
-        }
-
-        private string OpenPost()
-        {
-            Console.Write("Post index: ");
-            int index = int.Parse(Console.ReadLine());
-            _openPost = _indexer.GetPost(_postIdCache[index]);
-            return "Post opened";
-        }
-
-        private string Quit()
-        {
-            return "ByeBye";
-        }
-
-        private string ListPosts()
-        {
-            var posts = _indexer.Search();
+            var posts = _postReader.Search();
             _postIdCache.Clear();
-            var builder = new StringBuilder();
             foreach (var post in posts)
             {
-                builder.AppendLine(string.Format("{0,-2} - {2,-10} - {1,-40} ({3:dd.MM.yy HH:mm:ss})", _postIdCache.Count, post.Content, post.User.Name, post.TimeStamp.ToLocalTime()));
+                Console.WriteLine("{0,-2} - {2,-10} - {1,-40} ({3:dd.MM.yy HH:mm:ss})", _postIdCache.Count, post.Content, post.User.Name, post.Timestamp.ToLocalTime());
                 foreach (var comment in post.Comments ?? Enumerable.Empty<Comment>())
                 {
-                    builder.AppendLine(string.Format("     {0,-10} - {1,-40} ({2:dd.MM.yy HH:mm:ss})", comment.User.Name, comment.Content, comment.TimeStamp.ToLocalTime()));
+                    Console.WriteLine("     {0,-10} - {1,-40} ({2:dd.MM.yy HH:mm:ss})", comment.User.Name, comment.Content, comment.Timestamp.ToLocalTime());
                 }
                 _postIdCache.Add(post.Id);
             }
-
-            return builder.ToString();
         }
 
-
-        private string InsertPost()
+        private void InsertPost()
         {
             Console.WriteLine("New Post");
             Console.Write("Content: ");
             var content = Console.ReadLine();
-            Console.Write("User: ");
-            var user = Console.ReadLine();
-            return _indexer.Index(new Post
-            {
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                User = new User {Name = user, UserId = Guid.NewGuid()},
-                Content = content
-            });
+            _postWritingService.CreatePost(content);
         }
 
         public void RunRunRun()
@@ -115,10 +100,12 @@ namespace PawPaw.Cmd
                 {
                     if(_openPost != null)
                         Console.WriteLine("Selected post: {0} - {1}", _openPost.Content, _openPost.User.Name);
+                    if (_userProvider.GetCurrentUser() != null)
+                        Console.WriteLine("Current user: {0}", _userProvider.GetCurrentUser().Name);
                     input = Console.ReadLine().Trim().ToUpper();
                     if (_choices.ContainsKey(input))
                     {
-                        Console.WriteLine(_choices[input].Func());
+                        _choices[input].Action();
                     }
                     else
                     {
