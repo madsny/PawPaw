@@ -3,12 +3,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+
     <title>@ViewBag.Title</title>
 </head>
 <body>
-    <div class="container">
-        @RenderBody()        
-    </div>
+<div class="container">
+    @RenderBody()
+</div>
+    <script src="~/Scripts/jquery-2.2.2.min.js"></script>
     @RenderSection("scripts", required: false)
+
 </body>
 </html>

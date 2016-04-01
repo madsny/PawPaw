@@ -1,3 +1,22 @@
 ﻿<div>
-<h1>hello</h1>
+    <h1>hello</h1>
+    <pre id="hatt">
+        stuff!
+    </pre>
+
 </div>
+
+@section scripts
+{
+    <script>
+        jQuery(document).ready(function() {
+            var pre = jQuery("#hatt");
+            jQuery.get("/api/test")
+                .done(function(data) {
+                    pre.html(JSON.stringify(data));
+                }).error(function(data) {
+                    pre.html("error: " + JSON.stringify(data));
+                });
+        })
+    </script>
+}
