@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PawPaw.ElasticSearch", "Paw
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PawPaw.Cmd", "PawPaw.Console\PawPaw.Cmd.csproj", "{211E3D61-2565-4077-B9A0-3CD66AD7B21C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PawPaw.Api", "PawPaw.Api\PawPaw.Api.csproj", "{7E9E9C34-7C32-49DB-9742-AF0A9E3693AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{211E3D61-2565-4077-B9A0-3CD66AD7B21C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{211E3D61-2565-4077-B9A0-3CD66AD7B21C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{211E3D61-2565-4077-B9A0-3CD66AD7B21C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E9E9C34-7C32-49DB-9742-AF0A9E3693AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E9E9C34-7C32-49DB-9742-AF0A9E3693AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E9E9C34-7C32-49DB-9742-AF0A9E3693AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E9E9C34-7C32-49DB-9742-AF0A9E3693AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
